@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="중국어">
+<meta name="theme-color" content="#1D9E75">
+<title>중국어 학습</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --acc:#1D9E75;--acc-l:#E1F5EE;--acc-d:#0F6E56;
+  --acc2:#185FA5;--acc2-l:#E6F1FB;
+  --red:#D85A30;--red-l:#FAECE7;
+  --bg:#F8F9FA;--card:#FFFFFF;
+  --text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:#E5E7EB;
+  --shadow:0 1px 3px rgba(0,0,0,0.08);
+  --r:12px;--r2:8px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#0f0f0f;--card:#1c1c1e;--text:#f0f0f0;--text2:#aaa;--text3:#666;--border:#2c2c2e;--shadow:0 1px 3px rgba(0,0,0,0.3);}
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* 앱 레이아웃 */
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg);}
+.hdr{background:var(--acc);padding:env(safe-area-inset-top,14px) 16px 0;padding-top:max(env(safe-area-inset-top),14px);}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;}
+.hdr-title{font-size:18px;font-weight:600;color:#fff;letter-spacing:-0.5px;}
+.streak{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:13px;color:#fff;display:flex;align-items:center;gap:4px;}
+.tabs{display:flex;border-top:1px solid rgba(255,255,255,0.2);}
+.tab{flex:1;padding:10px 4px 11px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;transition:all 0.2s;letter-spacing:-0.2px;}
+.tab.on{color:#fff;border-bottom-color:#fff;}
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:12px;}
+.nav{background:var(--card);border-top:1px solid var(--border);padding:8px 0 max(env(safe-area-inset-bottom),8px);display:grid;grid-template-columns:repeat(4,1fr);}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px;font-family:inherit;color:var(--text3);transition:color 0.15s;}
+.nav-btn.on{color:var(--acc);}
+.nav-icon{font-size:22px;line-height:1;}
+.nav-label{font-size:10px;font-weight:500;}
+
+.scr{display:none;flex-direction:column;gap:12px;}
+.scr.on{display:flex;}
+
+/* 공통 컴포넌트 */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;border:1px solid var(--border);}
+.label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;}
+.btn{width:100%;padding:13px;background:var(--acc);color:#fff;border:none;border-radius:var(--r2);cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;transition:all 0.15s;letter-spacing:-0.3px;}
+.btn:active{transform:scale(0.97);}
+.btn.outline{background:transparent;color:var(--acc);border:1.5px solid var(--acc);}
+.btn.gray{background:var(--bg);color:var(--text);border:1px solid var(--border);}
+.btn.red{background:var(--red);}
+.btn.sm{padding:9px 14px;font-size:13px;width:auto;}
+.back-btn{background:none;border:none;font-size:14px;color:var(--acc);cursor:pointer;font-family:inherit;padding:0;display:flex;align-items:center;gap:4px;font-weight:500;}
+
+/* 홈 */
+.greeting{font-size:17px;font-weight:600;margin-bottom:4px;letter-spacing:-0.3px;}
+.greeting-sub{font-size:13px;color:var(--text2);}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.stat{background:var(--bg);border-radius:var(--r2);padding:12px;text-align:center;border:1px solid var(--border);}
+.stat-n{font-size:24px;font-weight:700;color:var(--acc);}
+.stat-l{font-size:11px;color:var(--text3);margin-top:2px;}
+.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.mi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);}
+.mi:active{transform:scale(0.97);}
+.mi-icon{font-size:24px;line-height:1;}
+.mi-name{font-size:14px;font-weight:600;color:var(--text);}
+.mi-desc{font-size:12px;color:var(--text2);}
+.voice-bar{background:var(--acc-l);border-radius:var(--r2);padding:10px 14px;font-size:12px;color:var(--acc-d);display:flex;align-items:center;gap:8px;}
+.vbar-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.daily-tip{background:var(--card);border-radius:var(--r);padding:14px;border-left:3px solid var(--acc);border-right:1px solid var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.tip-tag{font-size:11px;color:var(--acc);font-weight:600;margin-bottom:6px;}
+.tip-text{font-size:14px;color:var(--text);font-weight:600;margin-bottom:4px;}
+.tip-pin{font-size:12px;color:var(--acc);}
+.tip-ko{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* 플래시카드 */
+.fc-header{display:flex;justify-content:space-between;align-items:center;}
+.fc-prog{font-size:13px;color:var(--text2);font-weight:500;}
+.fc-score{font-size:12px;color:var(--text3);}
+.fc-wrap{perspective:1000px;}
+.fc-card{background:var(--card);border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,0.08);min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;cursor:pointer;transition:transform 0.15s;border:1px solid var(--border);user-select:none;}
+.fc-card:active{transform:scale(0.98);}
+.fc-cat{display:inline-block;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--acc-l);color:var(--acc-d);margin-bottom:12px;letter-spacing:0.3px;}
+.fc-tones{display:flex;gap:5px;margin-bottom:10px;align-items:center;}
+.tone-dot{width:10px;height:10px;border-radius:50%;}
+.tone-legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:8px 0;}
+.tone-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);}
+.tone-item-dot{width:8px;height:8px;border-radius:50%;}
+.fc-hanzi{font-size:60px;line-height:1;margin-bottom:8px;font-weight:300;}
+.fc-pin{font-size:20px;color:var(--acc);font-weight:500;margin-bottom:4px;letter-spacing:1px;}
+.fc-meaning{font-size:17px;color:var(--text);margin-top:8px;font-weight:500;}
+.fc-hint{font-size:12px;color:var(--text3);margin-top:14px;}
+.tts-row{display:flex;gap:8px;}
+.speed-btn{padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--r2);background:transparent;font-size:13px;cursor:pointer;color:var(--text2);font-family:inherit;transition:all 0.15s;}
+.speed-btn.on{background:var(--acc-l);color:var(--acc-d);border-color:var(--acc);}
+.fc-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fc-filter{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-btn{padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:transparent;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;transition:all 0.15s;font-weight:500;}
+.filter-btn.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+
+/* 시나리오 */
+.sc-list{display:flex;flex-direction:column;gap:8px;}
+.sc-cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.sc-cats::-webkit-scrollbar{display:none;}
+.cat-btn{padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;background:transparent;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;white-space:nowrap;transition:all 0.15s;font-weight:500;}
+.cat-btn.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.sc-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s;box-shadow:var(--shadow);}
+.sc-item:active{transform:scale(0.98);}
+.sc-ico{font-size:26px;flex-shrink:0;width:42px;height:42px;background:var(--bg);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;}
+.sc-info{flex:1;min-width:0;}
+.sc-title{font-size:14px;font-weight:600;color:var(--text);}
+.sc-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.sc-meta{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.sc-lvl{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;}
+.lvl1{background:var(--acc-l);color:var(--acc-d);}
+.lvl2{background:#FAEEDA;color:#854F0B;}
+.dlg-box{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--border);}
+.dlg-line{display:flex;gap:10px;align-items:flex-start;}
+.dlg-line.me{flex-direction:row-reverse;}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.av-cn{background:var(--acc-l);color:var(--acc-d);}
+.av-me{background:var(--acc2-l);color:var(--acc2);}
+.bbl{max-width:80%;}
+.bbl-txt{font-size:15px;font-weight:500;color:var(--text);padding:10px 13px;border-radius:16px 16px 16px 4px;background:var(--bg);border:1px solid var(--border);line-height:1.5;}
+.me .bbl-txt{border-radius:16px 16px 4px 16px;background:var(--acc2-l);color:var(--acc2);border-color:transparent;}
+.bbl-pin{font-size:12px;color:var(--acc);margin-top:5px;padding:0 3px;line-height:1.5;}
+.bbl-ko{font-size:12px;color:var(--text2);margin-top:2px;padding:0 3px;}
+.bbl-spk{background:none;border:none;cursor:pointer;font-size:13px;color:var(--acc);padding:3px;font-family:inherit;margin-top:3px;display:flex;align-items:center;gap:4px;font-weight:500;}
+.sc-tip{background:var(--bg);border-radius:var(--r2);padding:12px;border:1px solid var(--border);}
+.sc-tip-tag{font-size:11px;color:var(--acc);font-weight:600;margin-bottom:4px;}
+.sc-tip-text{font-size:13px;color:var(--text2);}
+.rec-section{background:var(--card);border-radius:var(--r);padding:14px;border:1px solid var(--border);display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);}
+.rec-label{font-size:12px;font-weight:600;color:var(--text2);}
+.rec-btns{display:grid;grid-template-columns:1fr auto;gap:8px;}
+.rec-result{font-size:13px;padding:10px 12px;background:var(--bg);border-radius:var(--r2);color:var(--text2);min-height:40px;display:flex;align-items:center;border:1px solid var(--border);line-height:1.5;}
+
+/* AI 탭 */
+.api-section{background:var(--card);border-radius:var(--r);padding:14px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.api-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.api-note{font-size:11px;color:var(--text3);margin-bottom:10px;}
+.api-row{display:flex;gap:8px;}
+.api-inp{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r2);font-size:14px;background:var(--bg);color:var(--text);font-family:inherit;transition:border-color 0.15s;}
+.api-inp:focus{outline:none;border-color:var(--acc);}
+.save-btn{padding:10px 16px;background:var(--acc);color:#fff;border:none;border-radius:var(--r2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.topic-wrap{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.topic-wrap::-webkit-scrollbar{display:none;}
+.topic-btn{padding:7px 14px;border:1.5px solid var(--border);border-radius:20px;background:transparent;font-size:13px;cursor:pointer;color:var(--text2);font-family:inherit;white-space:nowrap;transition:all 0.15s;font-weight:500;}
+.topic-btn.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.chat-box{background:var(--card);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);}
+.chat-msgs{padding:14px;min-height:240px;max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px;}
+.msg{max-width:88%;font-size:14px;line-height:1.6;padding:10px 14px;border-radius:16px;}
+.msg.ai{background:var(--bg);color:var(--text);border-radius:16px 16px 16px 4px;align-self:flex-start;border:1px solid var(--border);}
+.msg.user{background:var(--acc);color:#fff;border-radius:16px 16px 4px 16px;align-self:flex-end;}
+.msg.loading{color:var(--text3);font-style:italic;}
+.chat-inp-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--card);}
+.chat-inp{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:22px;font-size:14px;background:var(--bg);color:var(--text);font-family:inherit;transition:border-color 0.15s;}
+.chat-inp:focus{outline:none;border-color:var(--acc);}
+.send-btn{width:42px;height:42px;background:var(--acc);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
+.send-btn:active{transform:scale(0.9);}
+.ai-tip{background:var(--acc-l);border-radius:var(--r2);padding:10px 14px;font-size:12px;color:var(--acc-d);line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 헤더 -->
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-title">🇨🇳 중국어 학습</div>
+      <div class="streak" id="streak-display">🔥 0일</div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" onclick="goTab('home',this)">홈</button>
+      <button class="tab" onclick="goTab('flash',this)">단어</button>
+      <button class="tab" onclick="goTab('sc',this)">회화</button>
+      <button class="tab" onclick="goTab('ai',this)">AI</button>
+    </div>
+  </div>
+
+  <div class="body" id="main-body">
+
+    <!-- ===== 홈 ===== -->
+    <div class="scr on" id="scr-home">
+      <div class="voice-bar">
+        <div class="vbar-dot"></div>
+        <span id="voice-info" style="font-size:12px;">음성 엔진 감지 중...</span>
+      </div>
+      <div class="card">
+        <div class="greeting" id="greeting">안녕하세요! 👋</div>
+        <div class="greeting-sub">초급 · 여행 & 일상회화 코스</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="stat-words">0</div><div class="stat-l">학습 단어</div></div>
+        <div class="stat"><div class="stat-n" id="stat-streak">0</div><div class="stat-l">연속 일수</div></div>
+        <div class="stat"><div class="stat-n" id="stat-acc">-</div><div class="stat-l">정확도</div></div>
+      </div>
+      <div class="label">오늘의 단어</div>
+      <div class="daily-tip" id="daily-word"></div>
+      <div class="label">학습 메뉴</div>
+      <div class="menu">
+        <div class="mi" onclick="goTabName('flash')"><div class="mi-icon">🃏</div><div class="mi-name">단어 카드</div><div class="mi-desc">500개 · 성조 학습</div></div>
+        <div class="mi" onclick="goTabName('sc')"><div class="mi-icon">💬</div><div class="mi-name">회화 연습</div><div class="mi-desc">30개 시나리오</div></div>
+        <div class="mi" onclick="goTabName('ai')"><div class="mi-icon">🤖</div><div class="mi-name">AI 선생님</div><div class="mi-desc">자유 회화</div></div>
+        <div class="mi" onclick="startReview()"><div class="mi-icon">🔄</div><div class="mi-name">오늘의 복습</div><div class="mi-desc" id="review-count">복습 단어 계산 중</div></div>
+      </div>
+    </div>
+
+    <!-- ===== 플래시카드 ===== -->
+    <div class="scr" id="scr-flash">
+      <div class="label">카테고리 필터</div>
+      <div class="fc-filter" id="fc-filter"></div>
+      <div class="fc-header">
+        <span class="fc-prog" id="fc-prog">단어 1 / 500</span>
+        <span class="fc-score" id="fc-score">✅ 0 &nbsp;❌ 0</span>
+      </div>
+      <div class="fc-wrap">
+        <div class="fc-card" id="fc-card" onclick="revealCard()">
+          <div class="fc-cat" id="fc-cat">-</div>
+          <div class="fc-tones" id="fc-tones"></div>
+          <div class="fc-hanzi" id="fc-hanzi">-</div>
+          <div class="fc-pin" id="fc-pin">-</div>
+          <div class="fc-meaning" id="fc-meaning" style="display:none">-</div>
+          <div class="fc-hint" id="fc-hint">탭하면 뜻이 나와요</div>
+        </div>
+      </div>
+      <div class="tone-legend">
+        <div class="tone-item"><div class="tone-item-dot" style="background:#E24B4A"></div>1성</div>
+        <div class="tone-item"><div class="tone-item-dot" style="background:#1D9E75"></div>2성</div>
+        <div class="tone-item"><div class="tone-item-dot" style="background:#185FA5"></div>3성</div>
+        <div class="tone-item"><div class="tone-item-dot" style="background:#D85A30"></div>4성</div>
+        <div class="tone-item"><div class="tone-item-dot" style="background:#888"></div>경성</div>
+      </div>
+      <div class="tts-row">
+        <button class="btn" style="flex:2" onclick="speakCurrent()">🔊 발음 듣기</button>
+        <button class="speed-btn on" id="spd-slow" onclick="setSpd(0.75,this)">느리게</button>
+        <button class="speed-btn" id="spd-norm" onclick="setSpd(1.0,this)">보통</button>
+      </div>
+      <div class="fc-nav" id="fc-nav" style="display:none">
+        <button class="btn gray" onclick="nextCard(false)">❌ 다시 볼게요</button>
+        <button class="btn" onclick="nextCard(true)">✅ 알았어요</button>
+      </div>
+    </div>
+
+    <!-- ===== 시나리오 ===== -->
+    <div class="scr" id="scr-sc">
+      <!-- 목록 -->
+      <div id="sc-list-view">
+        <div class="sc-cats" id="sc-cats"></div>
+        <div class="sc-list" id="sc-list"></div>
+      </div>
+      <!-- 대화 -->
+      <div id="sc-dlg-view" style="display:none;flex-direction:column;gap:12px;">
+        <button class="back-btn" onclick="closeSc()">← 목록으로</button>
+        <div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:4px;" id="sc-dtitle"></div>
+          <div class="sc-tip"><div class="sc-tip-tag">💡 팁</div><div class="sc-tip-text" id="sc-tip"></div></div>
+        </div>
+        <div class="dlg-box" id="dlg-box"></div>
+        <div class="rec-section">
+          <div class="rec-label">🎤 따라 말하기 연습</div>
+          <div class="rec-btns">
+            <button class="btn sm" id="rec-btn" onclick="toggleRec()">녹음 시작</button>
+            <button class="btn sm outline" onclick="playTarget()">목표 듣기</button>
+          </div>
+          <div class="rec-result" id="rec-result">녹음 버튼을 눌러 내 발음을 확인해보세요</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AI 탭 ===== -->
+    <div class="scr" id="scr-ai">
+      <div class="api-section">
+        <div class="api-label">🔑 Claude API 키</div>
+        <div class="api-note">키는 이 기기에만 저장되며 외부로 전송되지 않아요</div>
+        <div class="api-row">
+          <input class="api-inp" type="password" id="api-key" placeholder="sk-ant-..." />
+          <button class="save-btn" onclick="saveKey()">저장</button>
+        </div>
+      </div>
+      <div class="ai-tip">💡 API 키가 없어도 아래 예시 대화로 연습할 수 있어요. API 키 입력 시 실제 AI 선생님과 대화 가능!</div>
+      <div class="label">연습 주제</div>
+      <div class="topic-wrap" id="topic-wrap"></div>
+      <div class="chat-box">
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="chat-inp-row">
+          <input class="chat-inp" id="chat-inp" placeholder="한국어나 중국어로 입력..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){sendChat();event.preventDefault();}"/>
+          <button class="send-btn" onclick="sendChat()">↑</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 하단 내비 -->
+  <div class="nav">
+    <button class="nav-btn on" id="nav-home" onclick="goTabName('home')"><div class="nav-icon">🏠</div><div class="nav-label">홈</div></button>
+    <button class="nav-btn" id="nav-flash" onclick="goTabName('flash')"><div class="nav-icon">🃏</div><div class="nav-label">단어</div></button>
+    <button class="nav-btn" id="nav-sc" onclick="goTabName('sc')"><div class="nav-icon">💬</div><div class="nav-label">회화</div></button>
+    <button class="nav-btn" id="nav-ai" onclick="goTabName('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI</div></button>
+  </div>
+</div>
+
+<script src="words.js"></script>
+<script src="scenarios.js"></script>
+<script>
+// ===== 상수 =====
+const TONE_COLORS = ['#888','#E24B4A','#1D9E75','#185FA5','#D85A30'];
+const TABS = ['home','flash','sc','ai'];
+const TOPICS = ['공항/여행','식당/주문','쇼핑','일상대화','자유 회화'];
+
+// ===== 상태 =====
+let state = {
+  fcIdx: 0,
+  fcList: [...WORDS],
+  fcCat: 'all',
+  revealed: false,
+  ttsSpeed: 0.75,
+  goodCnt: 0,
+  badCnt: 0,
+  currentSc: 0,
+  recording: false,
+  recog: null,
+  aiTopic: TOPICS[0],
+  chatHistory: [],
+  progress: {},  // word id -> {seen, good}
+  streak: 0,
+  lastDate: null,
+};
+
+// ===== 저장/불러오기 =====
+function save() {
+  try {
+    localStorage.setItem('cn_progress', JSON.stringify(state.progress));
+    localStorage.setItem('cn_streak', state.streak);
+    localStorage.setItem('cn_lastDate', state.lastDate);
+    localStorage.setItem('cn_goodCnt', state.goodCnt);
+    localStorage.setItem('cn_badCnt', state.badCnt);
+  } catch(e) {}
+}
+function load() {
+  try {
+    const p = localStorage.getItem('cn_progress');
+    if (p) state.progress = JSON.parse(p);
+    state.streak = parseInt(localStorage.getItem('cn_streak') || '0');
+    state.lastDate = localStorage.getItem('cn_lastDate');
+    state.goodCnt = parseInt(localStorage.getItem('cn_goodCnt') || '0');
+    state.badCnt = parseInt(localStorage.getItem('cn_badCnt') || '0');
+  } catch(e) {}
+}
+
+// ===== 스트릭 업데이트 =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (state.lastDate === today) return;
+  if (state.lastDate === yesterday) state.streak++;
+  else state.streak = 1;
+  state.lastDate = today;
+  save();
+}
+
+// ===== TTS =====
+let bestVoice = null;
+function initVoice() {
+  const tryFind = () => {
+    const voices = speechSynthesis.getVoices();
+    if (!voices.length) return;
+    const priority = ['Meijia','Tingting','Sin-ji','Li-mu','zh-TW','zh_TW','zh-CN','zh_CN'];
+    for (const key of priority) {
+      const v = voices.find(v => v.name.includes(key) || v.lang.replace('_','-').startsWith(key));
+      if (v) { bestVoice = v; break; }
+    }
+    if (!bestVoice) bestVoice = voices.find(v => v.lang.startsWith('zh')) || null;
+    const el = document.getElementById('voice-info');
+    if (bestVoice) {
+      el.textContent = '음성: ' + bestVoice.name;
+      el.parentElement.style.background = '#E1F5EE';
+    } else {
+      el.textContent = '중국어 음성 없음 — 기기 설정에서 중국어 음성을 추가하세요';
+      el.parentElement.style.background = '#FAECE7';
+      el.parentElement.querySelector('.vbar-dot').style.background = '#D85A30';
+    }
+  };
+  speechSynthesis.onvoiceschanged = tryFind;
+  tryFind();
+}
+function speak(text, rate) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-CN';
+  u.rate = rate || state.ttsSpeed;
+  u.pitch = 1.0;
+  if (bestVoice) u.voice = bestVoice;
+  speechSynthesis.speak(u);
+}
+
+// ===== 탭 전환 =====
+function goTab(name, btn) {
+  TABS.forEach(t => {
+    document.getElementById('scr-' + t).classList.toggle('on', t === name);
+    const nb = document.getElementById('nav-' + t);
+    if (nb) nb.classList.toggle('on', t === name);
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  document.getElementById('main-body').scrollTop = 0;
+}
+function goTabName(name) {
+  const idx = TABS.indexOf(name);
+  const tabs = document.querySelectorAll('.tab');
+  goTab(name, tabs[idx]);
+}
+
+// ===== 홈 초기화 =====
+function initHome() {
+  const h = new Date().getHours();
+  const greet = h < 12 ? '좋은 아침이에요! ☀️' : h < 18 ? '안녕하세요! 👋' : '좋은 저녁이에요! 🌙';
+  document.getElementById('greeting').textContent = greet;
+
+  const seen = Object.keys(state.progress).length;
+  const good = Object.values(state.progress).filter(p => p.good).length;
+  const acc = seen > 0 ? Math.round(good / seen * 100) + '%' : '-';
+  document.getElementById('stat-words').textContent = seen;
+  document.getElementById('stat-streak').textContent = state.streak;
+  document.getElementById('stat-acc').textContent = acc;
+  document.getElementById('streak-display').textContent = '🔥 ' + state.streak + '일';
+
+  // 오늘의 단어
+  const todayIdx = new Date().getDate() % WORDS.length;
+  const w = WORDS[todayIdx];
+  document.getElementById('daily-word').innerHTML = `
+    <div class="tip-tag">오늘의 단어 — ${w.cat}</div>
+    <div class="tip-text">${w.h}</div>
+    <div class="tip-pin">${w.p}</div>
+    <div class="tip-ko">${w.m}</div>
+  `;
+
+  const reviewWords = WORDS.filter(w => {
+    const p = state.progress[w.id];
+    if (!p) return false;
+    const diff = Date.now() - (p.lastSeen || 0);
+    return p.good && diff > 3600000;
+  });
+  document.getElementById('review-count').textContent = reviewWords.length > 0 ? reviewWords.length + '개 단어 복습' : '복습할 단어 없음';
+}
+
+// ===== 플래시카드 =====
+function initFlash() {
+  const cats = ['all', ...new Set(WORDS.map(w => w.cat))];
+  const fc = document.getElementById('fc-filter');
+  fc.innerHTML = cats.map(c => `<button class="filter-btn${c==='all'?' on':''}" onclick="setCat('${c}',this)">${c==='all'?'전체':c}</button>`).join('');
+  updateFcList();
+}
+function setCat(cat, btn) {
+  state.fcCat = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  state.fcIdx = 0;
+  updateFcList();
+  showCard();
+}
+function updateFcList() {
+  state.fcList = state.fcCat === 'all' ? [...WORDS] : WORDS.filter(w => w.cat === state.fcCat);
+}
+function showCard() {
+  const w = state.fcList[state.fcIdx];
+  if (!w) return;
+  document.getElementById('fc-cat').textContent = w.cat;
+  document.getElementById('fc-hanzi').textContent = w.h;
+  document.getElementById('fc-pin').textContent = w.p;
+  document.getElementById('fc-meaning').style.display = 'none';
+  document.getElementById('fc-hint').style.display = '';
+  document.getElementById('fc-nav').style.display = 'none';
+  document.getElementById('fc-prog').textContent = `단어 ${state.fcIdx+1} / ${state.fcList.length}`;
+  document.getElementById('fc-score').textContent = `✅ ${state.goodCnt} &nbsp;❌ ${state.badCnt}`;
+  const tonesEl = document.getElementById('fc-tones');
+  tonesEl.innerHTML = (w.t || []).map(t => `<div class="tone-dot" style="background:${TONE_COLORS[t]||'#888'}" title="${['경성','1성','2성','3성','4성'][t]||''}"></div>`).join('');
+  state.revealed = false;
+}
+function revealCard() {
+  if (state.revealed) return;
+  const w = state.fcList[state.fcIdx];
+  document.getElementById('fc-meaning').style.display = '';
+  document.getElementById('fc-hint').style.display = 'none';
+  document.getElementById('fc-nav').style.display = 'grid';
+  state.revealed = true;
+  speak(w.h);
+  if (!state.progress[w.id]) state.progress[w.id] = {seen:0, good:false};
+  state.progress[w.id].seen++;
+  state.progress[w.id].lastSeen = Date.now();
+  save();
+}
+function speakCurrent() {
+  const w = state.fcList[state.fcIdx];
+  if (w) speak(w.h);
+}
+function setSpd(s, btn) {
+  state.ttsSpeed = s;
+  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function nextCard(good) {
+  const w = state.fcList[state.fcIdx];
+  if (good) { state.goodCnt++; if (state.progress[w.id]) state.progress[w.id].good = true; }
+  else { state.badCnt++; if (state.progress[w.id]) state.progress[w.id].good = false; }
+  document.getElementById('fc-score').textContent = `✅ ${state.goodCnt} &nbsp;❌ ${state.badCnt}`;
+  state.fcIdx = (state.fcIdx + 1) % state.fcList.length;
+  showCard();
+  save();
+}
+function startReview() {
+  const reviewWords = WORDS.filter(w => {
+    const p = state.progress[w.id];
+    return p && p.good && (Date.now() - (p.lastSeen||0) > 3600000);
+  });
+  if (reviewWords.length === 0) { alert('복습할 단어가 없어요! 단어 카드를 먼저 학습해보세요.'); return; }
+  state.fcList = reviewWords;
+  state.fcIdx = 0;
+  goTabName('flash');
+  showCard();
+}
+
+// ===== 시나리오 =====
+function initSc() {
+  const cats = ['전체', ...new Set(SCENARIOS.map(s => s.cat))];
+  document.getElementById('sc-cats').innerHTML = cats.map((c,i) =>
+    `<button class="cat-btn${i===0?' on':''}" onclick="filterSc('${c}',this)">${c}</button>`
+  ).join('');
+  renderScList('전체');
+}
+function filterSc(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderScList(cat);
+}
+function renderScList(cat) {
+  const list = cat === '전체' ? SCENARIOS : SCENARIOS.filter(s => s.cat === cat);
+  document.getElementById('sc-list').innerHTML = list.map(sc => `
+    <div class="sc-item" onclick="openSc(${sc.id})">
+      <div class="sc-ico">${sc.icon}</div>
+      <div class="sc-info">
+        <div class="sc-title">${sc.title}</div>
+        <div class="sc-sub">${sc.dialogs.length}줄 대화</div>
+        <div class="sc-meta"><span class="sc-lvl lvl${sc.lvl}">${sc.lvl===1?'초급':'중급'}</span><span style="font-size:11px;color:var(--text3)">${sc.cat}</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+function openSc(id) {
+  const sc = SCENARIOS.find(s => s.id === id);
+  if (!sc) return;
+  state.currentSc = id;
+  document.getElementById('sc-dtitle').textContent = sc.icon + ' ' + sc.title;
+  document.getElementById('sc-tip').textContent = sc.tip;
+  const box = document.getElementById('dlg-box');
+  box.innerHTML = sc.dialogs.map(d => {
+    const isMe = d.s === 'me';
+    return `<div class="dlg-line ${isMe?'me':'cn'}">
+      <div class="av ${isMe?'av-me':'av-cn'}">${isMe?'나':'中'}</div>
+      <div class="bbl ${isMe?'me':''}">
+        <div class="bbl-txt">${d.t}</div>
+        <div class="bbl-pin">${d.p}</div>
+        <div class="bbl-ko">${d.k}</div>
+        <button class="bbl-spk" onclick="speak('${d.t.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',0.85)">🔊 듣기</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('sc-list-view').style.display = 'none';
+  document.getElementById('sc-dlg-view').style.display = 'flex';
+  document.getElementById('rec-result').textContent = '녹음 버튼을 눌러 내 발음을 확인해보세요';
+  document.getElementById('main-body').scrollTop = 0;
+}
+function closeSc() {
+  document.getElementById('sc-list-view').style.display = '';
+  document.getElementById('sc-dlg-view').style.display = 'none';
+  if (state.recording && state.recog) { state.recog.stop(); state.recording = false; }
+}
+function playTarget() {
+  const sc = SCENARIOS.find(s => s.id === state.currentSc);
+  if (!sc) return;
+  const myLine = sc.dialogs.find(d => d.s === 'me');
+  if (myLine) speak(myLine.t, 0.8);
+}
+function toggleRec() {
+  const btn = document.getElementById('rec-btn');
+  const res = document.getElementById('rec-result');
+  if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    res.textContent = '이 브라우저는 음성인식 미지원 — Chrome 또는 Safari를 사용해주세요';
+    return;
+  }
+  if (state.recording) {
+    state.recording = false;
+    if (state.recog) state.recog.stop();
+    btn.textContent = '녹음 시작';
+    btn.className = 'btn sm';
+    return;
+  }
+  state.recording = true;
+  btn.textContent = '🔴 듣는 중...';
+  btn.className = 'btn sm red';
+  const R = window.SpeechRecognition || window.webkitSpeechRecognition;
+  state.recog = new R();
+  state.recog.lang = 'zh-CN';
+  state.recog.continuous = false;
+  state.recog.interimResults = false;
+  state.recog.onresult = e => {
+    const said = e.results[0][0].transcript;
+    const conf = Math.round((e.results[0][0].confidence || 0) * 100);
+    const sc = SCENARIOS.find(s => s.id === state.currentSc);
+    const target = sc ? sc.dialogs.find(d => d.s === 'me') : null;
+    const normalize = t => t.replace(/[，。！？、\s]/g,'');
+    if (target) {
+      const match = normalize(said) === normalize(target.t);
+      res.textContent = (match ? '✅ 완벽해요! ' : '인식: ' + said + (conf ? ` (${conf}%)` : '') + '\n목표: ' + target.t);
+      if (match) speak('很好！', 1.0);
+    } else {
+      res.textContent = '인식: ' + said;
+    }
+    state.recording = false;
+    btn.textContent = '녹음 시작';
+    btn.className = 'btn sm';
+  };
+  state.recog.onerror = () => {
+    res.textContent = '인식 실패. 다시 시도해주세요.';
+    state.recording = false;
+    btn.textContent = '녹음 시작';
+    btn.className = 'btn sm';
+  };
+  state.recog.start();
+}
+
+// ===== AI 탭 =====
+function initAI() {
+  document.getElementById('topic-wrap').innerHTML = TOPICS.map((t,i) =>
+    `<button class="topic-btn${i===0?' on':''}" onclick="setTopic(this,'${t}')">${t}</button>`
+  ).join('');
+  const key = localStorage.getItem('cn_apikey');
+  if (key) document.getElementById('api-key').value = key;
+  addMsg('ai', '你好！我是你的中文老师小美。👩‍🏫\n(안녕하세요! 저는 중국어 선생님 샤오메이예요.)\n오늘은 어떤 상황을 연습하고 싶으세요?');
+}
+function setTopic(btn, topic) {
+  state.aiTopic = topic;
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function saveKey() {
+  const k = document.getElementById('api-key').value.trim();
+  if (k) { localStorage.setItem('cn_apikey', k); addMsg('ai', '✅ API 키가 저장됐어요! 이제 실제 AI 선생님과 대화할 수 있어요.'); }
+}
+function addMsg(type, text) {
+  const msgs = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = text.replace(/\n/g,'<br>');
+  if (type === 'loading') div.id = 'loading-msg';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+async function sendChat() {
+  const inp = document.getElementById('chat-inp');
+  const text = inp.value.trim();
+  if (!text) return;
+  const key = localStorage.getItem('cn_apikey');
+  inp.value = '';
+  addMsg('user', text);
+  state.chatHistory.push({role:'user', content:text});
+
+  if (!key) {
+    const tips = [
+      'API 키를 입력하면 실제 AI와 대화할 수 있어요!\n그 전까지 이렇게 연습해봐요:\n"식당에서 주문 연습하고 싶어요"',
+      '위의 주제 버튼을 선택하고 API 키를 입력해보세요 😊',
+    ];
+    setTimeout(() => addMsg('ai', tips[Math.floor(Math.random()*tips.length)]), 600);
+    return;
+  }
+
+  addMsg('loading', '선생님이 답변 중...');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        system: `당신은 친절하고 격려적인 중국어 회화 선생님 '샤오메이(小美)'입니다.
+학습자: 한국인 초급자
+현재 연습 주제: ${state.aiTopic}
+
+답변 규칙:
+1. 중국어로 짧게 말하고, 바로 아래에 한국어 번역을 써주세요
+2. 어려운 단어에는 병음을 괄호로 표시해요
+3. 문법 오류는 부드럽게 교정해요 (예: "아, '저는'은 中文로 '我'예요!")
+4. 답변은 3~4문장 이내로 짧게 유지해요
+5. 실제 상황 대화로 이끌어줘요
+6. 학습자를 항상 격려하고 칭찬해요`,
+        messages: state.chatHistory
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.content?.[0]?.text || '응답 오류';
+    state.chatHistory.push({role:'assistant', content:reply});
+    document.getElementById('loading-msg')?.remove();
+    addMsg('ai', reply);
+    const firstLine = reply.split('\n')[0];
+    if (firstLine) speak(firstLine, 0.9);
+  } catch(e) {
+    document.getElementById('loading-msg')?.remove();
+    addMsg('ai', '오류: ' + e.message + '\nAPI 키를 확인해주세요.');
+  }
+}
+
+// ===== 초기화 =====
+window.addEventListener('load', () => {
+  load();
+  updateStreak();
+  initVoice();
+  initHome();
+  initFlash();
+  showCard();
+  initSc();
+  initAI();
+});
+
+// ===== 서비스 워커 등록 (PWA) =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
